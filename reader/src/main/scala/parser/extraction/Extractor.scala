@@ -63,7 +63,8 @@ object Extractor {
     * @return List containing pairs of Keywords and a List (non-repeating) of values found for that keyword
     */
   @throws[IllegalArgumentException]
-  def getAllMatchedValues(text: Option[String], keywords: Map[Keyword, Specification], clientRegEx: Map[Keyword, Regex] = Map()): MatchedPair = {
+  def getAllMatchedValues(text: Option[String], keywords: Map[Keyword, Specification],
+                          clientRegEx: Map[Keyword, Regex] = Map(), includeDuplicates: Boolean): MatchedPair = {
     require(keywords.nonEmpty, "The list of keywords should not be empty")
     text match {
       case Some(t) =>
@@ -84,10 +85,10 @@ object Extractor {
                 else findKeywordInText(key, tag, t) //to be changed, here we need to manually search for the keywords in the text
 
               case multiOp: MultipleOf =>
-                val ext = getOptions(text, key, multiOp.possibilities, multi = true)
+                val ext = getOptions(text, key, multiOp.possibilities, multi = true, includeDuplicates = includeDuplicates)
                 (key, ext)
               case oneOp: OneOf =>
-                val ext = getOptions(text, key, oneOp.possibilities, multi = false)
+                val ext = getOptions(text, key, oneOp.possibilities, multi = false, includeDuplicates = false)
                 (key, ext)
             }
           }
@@ -115,7 +116,7 @@ object Extractor {
     require(keywords.nonEmpty, "The list of keywords should not be empty")
     text match {
       case Some(_) =>
-        getAllMatchedValues(text, keywords, clientRegEx).map { case (k, v) =>
+        getAllMatchedValues(text, keywords, clientRegEx, includeDuplicates = false).map { case (k, v) =>
           v.headOption match {
             case Some(entry) => (k, Seq(entry))
             case None => (k, Seq())
@@ -141,7 +142,7 @@ object Extractor {
     text match {
       case Some(t) =>
         if (t.nonEmpty) {
-          val matchedValues = getAllMatchedValues(text, keywords, clientRegEx)
+          val matchedValues = getAllMatchedValues(text, keywords, clientRegEx, includeDuplicates = false)
           val mostFound = matchedValues.filter(m => !isMulti(m._1, keywords)).maxBy(_._2.size)._2.size //Gets the size of the pair that has the most values
           val mappedValues = for (i <- 0 until mostFound; (key, listMatched) <- matchedValues) yield {
             if (isMulti(key, keywords) && listMatched.size > mostFound) {
@@ -215,7 +216,7 @@ object Extractor {
     */
   def getSingleJSON(text: Option[String], keywords: Map[Keyword, Specification], flag: String = "empty", clientRegEx: Map[Keyword, Regex] = Map()): String = {
     require(keywords.nonEmpty, "The list of keywords should not be empty")
-    val mp = getAllMatchedValues(text, keywords, clientRegEx)
+    val mp = getAllMatchedValues(text, keywords, clientRegEx, includeDuplicates = false)
     makeJSONString(mp, flag)
   }
 
@@ -387,17 +388,24 @@ object Extractor {
     * @param opList  - List of options to choose from
     * @return - A list of all the matched options found
     */
-  private def getOptions(text: Option[String], keyword: Keyword, opList: List[String], multi: Boolean): List[String] = {
+  private def getOptions(text: Option[String], keyword: Keyword, opList: List[String], multi: Boolean, includeDuplicates: Boolean): List[String] = {
     text match {
       case Some(t) =>
         val tLower = t.toLowerCase
         val kLower = keyword.toLowerCase
         if (tLower.contains(kLower)) {
-          val found = for (op <- opList if t.toLowerCase.contains(op.toLowerCase)) yield op
+
+          val matches: Seq[(String, Int)] = for {
+            op: String <- opList
+            if tLower.contains(op.toLowerCase)
+          } yield (op, countOccurrences(tLower, op))
+
+          val found = (matches map { m => m._1 }).toList
+
           if (multi) {
-            found
-          }
-          else {
+            if (includeDuplicates) expandDuplicates(matches)
+            else found
+          } else {
             val count = kLower.r.findAllMatchIn(tLower).length
             found.take(count)
           }
@@ -407,4 +415,15 @@ object Extractor {
       case None => List()
     }
   }
+
+  def expandDuplicates(seq: Seq[(String, Int)]): List[String] = {
+    val expanded = seq.flatMap {
+      case (s, 1) => Seq(s)
+      case (s, numOccurrences) => 0 until numOccurrences map { _ => s } // expand it out.
+    }
+    expanded.toList
+  }
+
+  def countOccurrences(src: String, tgt: String): Int =
+    src.sliding(tgt.length).count(window => window == tgt)
 }

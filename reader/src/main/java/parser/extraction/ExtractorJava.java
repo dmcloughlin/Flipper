@@ -1,17 +1,16 @@
 package parser.extraction;
 
-import java.util.*;
-
-import net.sourceforge.lept4j.ILeptonica;
 import parser.utils.Specification;
 import scala.Option;
 import scala.Some;
+import scala.collection.JavaConverters;
 import scala.util.matching.Regex;
 
-import java.util.List;
 import java.io.File;
-
-import scala.collection.JavaConverters;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ExtractorJava {
 
@@ -64,6 +63,20 @@ public class ExtractorJava {
      * @throws IllegalArgumentException If the keywords list is empty
      */
     public Map getAllMatchedValues(String text, Map<String, Specification> keywords, Map<String, String> clientRegEx) throws IllegalArgumentException {
+        return getAllMatchedValues(text, keywords, clientRegEx, false);
+    }
+
+    /**
+     * Method that will iterate through a list of given keywords and will try to obtain a value for that keyword
+     *
+     * @param text        - Text in which to look for values for the specified keywords
+     * @param keywords    - List containing all the keywords we want to find values for
+     * @param clientRegEx - Optional parameter - If the client already has a predefined Regular Expression for a given key
+     *                    use that regular expression instead of ours
+     * @return List containing pairs of Keywords and a List (non-repeating) of values found for that keyword
+     * @throws IllegalArgumentException If the keywords list is empty
+     */
+    public Map getAllMatchedValues(String text, Map<String, Specification> keywords, Map<String, String> clientRegEx, boolean includeDuplicates) throws IllegalArgumentException {
         if (keywords.isEmpty())
             throw new IllegalArgumentException("The list of keywords should not be empty");
 
@@ -71,7 +84,7 @@ public class ExtractorJava {
         Option<String> textOpt = (text != null && !text.equals("")) ? Some.apply(text) : Option.apply(null);
 
         //Convert scala.collection.immutable.List to java.util.List
-        scala.collection.immutable.Map result = Extractor.getAllMatchedValues(textOpt, keywordsToScala(keywords), regexToScala(clientRegEx));
+        scala.collection.immutable.Map result = Extractor.getAllMatchedValues(textOpt, keywordsToScala(keywords), regexToScala(clientRegEx), includeDuplicates);
         return scalaResultToJava(result);
     }
 

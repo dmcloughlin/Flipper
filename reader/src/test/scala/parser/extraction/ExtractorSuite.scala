@@ -16,13 +16,13 @@ class ExtractorSuite extends FunSuite {
   val text: Option[String] = readPDF(file)
   val colorText = Some("In this example text we will want to find a specific color." +
                        " Here are some of the options: blue , red, green, orange." +
-                       " These are just some examples.")
+                       " These are just some examples. blue.")
 
   /**
     * Tests if the result of calling getAllMatchedValues is correct or not
     */
   test("Find Expected Value") {
-    val matchedValues = getAllMatchedValues(text, Map("name" -> ProperNoun(), "age" -> Number()))
+    val matchedValues = getAllMatchedValues(text, Map("name" -> ProperNoun(), "age" -> Number()), includeDuplicates = false)
     val expectedValue = "Margarida Reis"
     if (matchedValues.isEmpty) fail("getAllMatchedValues returned an empty List")
     else assert(matchedValues.head._2.head == expectedValue)
@@ -32,7 +32,7 @@ class ExtractorSuite extends FunSuite {
     * Tests that passing a list of possible values to getAllMatchedValues will return one of the possibilities passed (assuming it exists in the text)
     */
   test("Find expected value from one of possible values") {
-    val matchedValues = getAllMatchedValues(colorText, Map("color" -> OneOf(List("blue", "red"))))
+    val matchedValues = getAllMatchedValues(colorText, Map("color" -> OneOf(List("blue", "red"))), includeDuplicates = false)
     val expectedValue = "blue"
     assert(matchedValues.head._2.head == expectedValue)
   }
@@ -41,8 +41,14 @@ class ExtractorSuite extends FunSuite {
     * Tests that passing a list of possible values to getAllMatchedValues will return multiple of the possibilities passed (assuming it exists in the text)
     */
   test("Find expected values from multiple of possible values") {
-    val matchedValues = getAllMatchedValues(colorText, Map("color" -> MultipleOf(List("blue", "red"))))
+    val matchedValues = getAllMatchedValues(colorText, Map("color" -> MultipleOf(List("blue", "red"))), includeDuplicates = false)
     val expectedValue = List("blue", "red")
+    matchedValues.head._2 should equal(expectedValue)
+  }
+
+  test("Find expected values and the number of occurrences of those values") {
+    val matchedValues = getAllMatchedValues(colorText, Map("color" -> MultipleOf(List("blue", "red"))), includeDuplicates = true)
+    val expectedValue = List("blue", "blue", "red")
     matchedValues.head._2 should equal(expectedValue)
   }
 
@@ -50,8 +56,8 @@ class ExtractorSuite extends FunSuite {
     * Tests that passing a list of possible values that don't exist in the text will return an empty list in both OneOf and MultipleOf
     */
   test("OneOf/MultipleOf does not find any value") {
-    val oneOfValues = getAllMatchedValues(colorText, Map("color" -> OneOf( List("does not exist"))))
-    val multipleValues = getAllMatchedValues(colorText, Map("color" -> MultipleOf( List("does not exist"))))
+    val oneOfValues = getAllMatchedValues(colorText, Map("color" -> OneOf( List("does not exist"))), includeDuplicates = false)
+    val multipleValues = getAllMatchedValues(colorText, Map("color" -> MultipleOf( List("does not exist"))), includeDuplicates = false)
     assert(oneOfValues.head._2.isEmpty && multipleValues.head._2.isEmpty)
   }
 
@@ -60,7 +66,7 @@ class ExtractorSuite extends FunSuite {
     */
   test("OneOf with an empty possibilities list") {
     assertThrows[IllegalArgumentException] {
-      getAllMatchedValues(colorText, Map("color" -> OneOf( List())))
+      getAllMatchedValues(colorText, Map("color" -> OneOf( List())), includeDuplicates = false)
     }
   }
 
@@ -69,7 +75,7 @@ class ExtractorSuite extends FunSuite {
     */
   test("MultipleOf with an empty possibilities list") {
     assertThrows[IllegalArgumentException] {
-      getAllMatchedValues(colorText, Map("color" -> MultipleOf( List())))
+      getAllMatchedValues(colorText, Map("color" -> MultipleOf( List())), includeDuplicates = false)
     }
   }
 
@@ -78,7 +84,7 @@ class ExtractorSuite extends FunSuite {
     */
   test("Get all matched values with an empty keyword Map") {
     assertThrows[IllegalArgumentException](
-      getAllMatchedValues(text, Map())
+      getAllMatchedValues(text, Map(), includeDuplicates = false)
     )
   }
 
@@ -86,7 +92,7 @@ class ExtractorSuite extends FunSuite {
     * Tests that passing a null or empty text will return an empty list
     */
   test("Get all matched values with an empty String") {
-    val emptyValues = getAllMatchedValues(Option(""), Map("name" -> ProperNoun(), "age" -> Number()))
+    val emptyValues = getAllMatchedValues(Option(""), Map("name" -> ProperNoun(), "age" -> Number()), includeDuplicates = false)
     assert(emptyValues.isEmpty)
   }
 
@@ -95,7 +101,7 @@ class ExtractorSuite extends FunSuite {
     * Tests if the result of calling getAllMatchedValues with a keyword that does not exist in the text is empty
     */
   test("Search for non-existing keyword") {
-    val matchedValues = getAllMatchedValues(text, Map("color" -> Noun()))
+    val matchedValues = getAllMatchedValues(text, Map("color" -> Noun()), includeDuplicates = false)
     if (matchedValues.isEmpty) fail("Matched value came back as an Empty List")
     else assert(matchedValues.head._2.isEmpty)
   }

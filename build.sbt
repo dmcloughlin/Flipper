@@ -6,9 +6,9 @@ val basicSettings = Seq(
   version := "0.1",
   scalaVersion := "2.12.4",
 
-  publishTo := sonatypePublishTo.value,
-  useGpg := true,
-  pgpReadOnly := false,
+//  publishTo := sonatypePublishTo.value,
+//  useGpg := true,
+//  pgpReadOnly := false,
   publishMavenStyle := true,
 
   testOptions += Tests.Argument(TestFrameworks.JUnit, "-q", "-v"),
