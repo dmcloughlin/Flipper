@@ -3,17 +3,16 @@ package parser.extraction
 import java.io.File
 import java.text.Normalizer
 
-import parser.utils.ImageProcessing._
-import parser.utils.SpellChecker._
-import parser.utils.OpenNLP._
-import parser.utils._
 import org.apache.pdfbox.text.PDFTextStripper
-
-import scala.util.matching.Regex
-import FileHandler._
+import parser.extraction.FileHandler._
+import parser.utils.ImageProcessing._
+import parser.utils.OpenNLP._
+import parser.utils.SpellChecker._
+import parser.utils._
 
 import scala.annotation.tailrec
 import scala.io.Source
+import scala.util.matching.Regex
 
 /**
   * Singleton object that implements all the functionality regarding the extraction of information from a PDF document
