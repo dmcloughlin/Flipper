@@ -397,7 +397,7 @@ object Extractor {
           val matches: Seq[(String, Int)] = for {
             op: String <- opList
             if tLower.contains(op.toLowerCase)
-          } yield (op, countOccurrences(tLower, op))
+          } yield (op, countOccurrences(tLower, op.toLowerCase))
 
           val found = (matches map { m => m._1 }).toList
 
@@ -423,6 +423,12 @@ object Extractor {
     expanded.toList
   }
 
-  def countOccurrences(src: String, tgt: String): Int =
-    src.sliding(tgt.length).count(window => window == tgt)
+  def countOccurrences(text: String, keyword: String): Int = {
+    val rx = ("""\b(\s*,*"""+keyword+"""\s*,*)\b""").r
+    val matches: Iterator[String] = for {
+      m <- rx.findAllIn(text).matchData
+      e <- m.subgroups
+    } yield e
+    matches.length
+  }
 }

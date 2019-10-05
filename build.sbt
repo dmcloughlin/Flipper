@@ -39,7 +39,7 @@ val basicSettings = Seq(
   libraryDependencies += "com.sksamuel.scrimage" %% "scrimage-filters" % "3.0.0-alpha4"
 )
 
-pgpReadOnly := false
+//pgpReadOnly := false
 
 lazy val root = project.in(file(".")).aggregate(reader, generator, converter).settings(basicSettings)
 
