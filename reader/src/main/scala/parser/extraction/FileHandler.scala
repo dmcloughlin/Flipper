@@ -1,7 +1,9 @@
 package parser.extraction
 
 import java.io.File
+
 import com.sksamuel.scrimage.Image
+//import com.sksamuel.scrimage.Image
 import org.apache.pdfbox.pdmodel.PDDocument
 
 /**

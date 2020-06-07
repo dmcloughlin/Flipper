@@ -124,7 +124,7 @@ public class GeneratorJava {
         scala.collection.mutable.Map mutableMap = JavaConverters.mapAsScalaMapConverter(javaMap).asScala();
 
         //Convert scala mutable map to scala immutable map by concatenating it with an empty immutable HashMap
-        return new scala.collection.immutable.HashMap<>().$plus$plus(mutableMap);
+        return (scala.collection.immutable.Map) new scala.collection.immutable.HashMap<>().$plus$plus(mutableMap);
     }
 
     /**
@@ -137,6 +137,6 @@ public class GeneratorJava {
         scala.collection.mutable.Map mutableMap = JavaConverters.mapAsScalaMapConverter(javaMap).asScala();
 
         //Convert scala mutable map to scala immutable map by concatenating it with an empty immutable HashMap
-        return new scala.collection.immutable.HashMap<>().$plus$plus(mutableMap);
+        return (scala.collection.immutable.Map) new scala.collection.immutable.HashMap<>().$plus$plus(mutableMap);
     }
 }

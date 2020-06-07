@@ -314,7 +314,7 @@ public class ExtractorJava {
         scala.collection.mutable.Map mutableMap = JavaConverters.mapAsScalaMapConverter(listJSON).asScala();
 
         //Convert scala mutable map to scala immutable map by concatenating it with an empty immutable HashMap
-        scala.collection.immutable.Map immutableMap = new scala.collection.immutable.HashMap<>().$plus$plus(mutableMap);
+        scala.collection.immutable.Map immutableMap = (scala.collection.immutable.Map) new scala.collection.immutable.HashMap<>().$plus$plus(mutableMap);
 
         return Extractor.makeJSONString(immutableMap, flag);
     }
@@ -342,7 +342,7 @@ public class ExtractorJava {
         scala.collection.mutable.Map mutableMap = JavaConverters.mapAsScalaMapConverter(keywords).asScala();
 
         //Convert scala mutable map to scala immutable map by concatenating it with an empty immutable HashMap
-        return new scala.collection.immutable.HashMap<>().$plus$plus(mutableMap);
+        return (scala.collection.immutable.Map) new scala.collection.immutable.HashMap<>().$plus$plus(mutableMap);
     }
 
     /**
@@ -364,7 +364,7 @@ public class ExtractorJava {
 
         //convert java.util.Map to scala.collection.mutable.Map, then to scala.collection.immutable.Map
         scala.collection.mutable.Map mutableMap = JavaConverters.mapAsScalaMapConverter(regexMap).asScala();
-        return new scala.collection.immutable.HashMap<>().$plus$plus(mutableMap);
+        return (scala.collection.immutable.Map) new scala.collection.immutable.HashMap<>().$plus$plus(mutableMap);
     }
 
 
